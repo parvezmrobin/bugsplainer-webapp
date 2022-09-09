@@ -119,8 +119,16 @@ function onMouseUp() {
         <button type="submit" class="btn btn-primary">Explain</button>
       </div>
     </form>
-    <div class="row">
-      <pre>
+    <div class="row gx-0">
+      <div class="col-auto">
+        <pre>
+          <code class="hljs" style=" text-align: right;">{{
+              fileContent.split('\n').map((_, i) => i).slice(1).join('\n')
+            }}</code>
+        </pre>
+      </div>
+      <div class="col">
+        <pre>
           <code
               class="language-python"
               ref="codeEditor"
@@ -129,10 +137,17 @@ function onMouseUp() {
               @focusout="highlightCode"
           >{{ fileContent }}</code>
       </pre>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss">
 @import "highlight.js/scss/monokai";
+</style>
+
+<style lang="scss" scoped>
+code:focus-visible {
+  outline: none;
+}
 </style>
