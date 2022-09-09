@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import hljs from "highlight.js/lib/core";
 import python from "highlight.js/lib/languages/python";
-import { nextTick, ref, watch } from "vue";
+import {computed, nextTick, ref, watch} from "vue";
 
 import Highlighter from "../components/Highlighter.vue";
+import Explanations, { Explanation } from "../components/Explanations.vue";
 
 hljs.registerLanguage("python", python);
 
@@ -11,6 +12,17 @@ const fileContent = ref("");
 const codeEditor = ref<HTMLDivElement>();
 const explainFrom = ref<number>();
 const explainTill = ref<number>();
+
+const explanations = ref<Explanation[]>([]);
+
+const highlightedLines = computed(() => {
+  const highlightedLines = explanations.value.map((exp) => [exp.from, exp.to]);
+  if (explainFrom.value && explainTill.value) {
+    highlightedLines.push([explainFrom.value, explainTill.value])
+  }
+
+  return highlightedLines;
+})
 
 function readFile(event: Event) {
   let files = (event.target as HTMLInputElement).files as FileList;
@@ -97,11 +109,22 @@ function onMouseUp() {
   explainFrom.value = precedingLines + 1;
   explainTill.value = selectedLines + 1;
 }
+
+function explain() {
+  if (!explainFrom.value || !explainTill.value) {
+    return;
+  }
+  explanations.value.push({
+    from: explainFrom.value,
+    to: explainTill.value,
+    explanation: `This is an explanation from line ${explainFrom.value} to ${explainTill.value}`,
+  });
+}
 </script>
 
 <template>
   <div class="container-fluid">
-    <form class="row gy-2 gx-3 align-items-center">
+    <form class="row gy-2 gx-3 align-items-center" @submit.prevent="explain">
       <div class="col-auto">
         <input
           type="file"
@@ -135,7 +158,9 @@ function onMouseUp() {
         </div>
       </div>
       <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Explain</button>
+        <button type="submit" class="btn btn-primary">
+          Explain
+        </button>
       </div>
     </form>
     <div class="row gx-0">
@@ -155,8 +180,11 @@ function onMouseUp() {
               @mouseup="onMouseUp"
               @focusout="highlightCode"
           >{{ fileContent }}</code>
-          <Highlighter :lines="[[explainFrom, explainTill]]"/>
+          <Highlighter :lines="highlightedLines"/>
         </pre>
+      </div>
+      <div class="col">
+        <Explanations :explanations="explanations" />
       </div>
     </div>
   </div>

@@ -1,13 +1,18 @@
 <template>
   <svg class="highlighter">
+    <defs>
+      <linearGradient id="Gradient1">
+        <stop offset="98%" stop-color="#0184bb" stop-opacity="0.25" />
+        <stop offset="100%" stop-color="#0184bb" stop-opacity="0.00" />
+      </linearGradient>
+    </defs>
     <svg width="1em" height="1em" overflow="visible" viewBox="0 0 1 1">
       <template v-for="highlightSegment in highlightSegments">
         <rect
           :y="highlightSegment[0]"
           :height="highlightSegment[1] - highlightSegment[0]"
-          width="200px"
-          fill="cornflowerblue"
-          fill-opacity="0.25"
+          :width="`${width}px`"
+          fill="url(#Gradient1)"
         ></rect>
       </template>
     </svg>
@@ -28,6 +33,7 @@ export default defineComponent({
   data() {
     return {
       highlightSegments: [] as [number, number][],
+      width: 200,
     };
   },
   watch: {
@@ -41,6 +47,21 @@ export default defineComponent({
       },
     },
   },
+
+  methods: {
+    onWindowResize() {
+      const fontSize = parseFloat(getComputedStyle(this.$el).fontSize);
+      this.width = this.$el.clientWidth / fontSize - 2; // 2em padding
+    },
+  },
+  mounted() {
+    this.onWindowResize();
+
+    window.addEventListener("resize", this.onWindowResize);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.onWindowResize);
+  },
 });
 </script>
 
@@ -53,6 +74,5 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   padding: 1em;
-  color: aquamarine;
 }
 </style>
