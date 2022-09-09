@@ -3,6 +3,8 @@ import hljs from "highlight.js/lib/core";
 import python from "highlight.js/lib/languages/python";
 import { nextTick, ref, watch } from "vue";
 
+import Highlighter from "../components/Highlighter.vue";
+
 hljs.registerLanguage("python", python);
 
 const fileContent = ref("");
@@ -47,7 +49,10 @@ function onMouseUp() {
   }
   let anchorNode = selection.anchorNode as Node;
   let focusNode = selection.focusNode as Node;
-  if (anchorNode === focusNode && selection.anchorOffset == selection.focusOffset) {
+  if (
+    anchorNode === focusNode &&
+    selection.anchorOffset == selection.focusOffset
+  ) {
     // this is a click; not selection
     return;
   }
@@ -59,12 +64,16 @@ function onMouseUp() {
     anchorNode = anchorNode.parentNode as Node;
   }
   const anchorNodeIndex = siblings.indexOf(anchorNode);
+  const linesInAnchor =
+    (anchorNode.textContent as string)
+      .slice(0, selection.anchorOffset)
+      .split("\n").length - 1;
   const precedingLines = siblings
     .slice(0, anchorNodeIndex)
     .reduce(
       (lineCount, sibling) =>
         lineCount + (sibling.textContent as string).split("\n").length - 1,
-      0
+      linesInAnchor
     );
 
   while (focusNode.parentNode !== codeEditor.value) {
@@ -73,12 +82,16 @@ function onMouseUp() {
   }
   const focusNodeIndex = siblings.indexOf(focusNode);
 
+  const linesInFocusNode =
+    (focusNode.textContent as string)
+      .slice(0, selection.focusOffset)
+      .split("\n").length - 1;
   const selectedLines = siblings
     .slice(0, focusNodeIndex)
     .reduce(
       (lineCount, sibling) =>
         lineCount + (sibling.textContent as string).split("\n").length - 1,
-      0
+      linesInFocusNode
     );
 
   explainFrom.value = precedingLines + 1;
@@ -93,7 +106,7 @@ function onMouseUp() {
         <input
           type="file"
           class="form-control"
-          style="height: calc(3.5rem + 2px); line-height: 3.5rem;"
+          style="height: calc(3.5rem + 2px); line-height: 3.5rem"
           @change="readFile"
         />
       </div>
@@ -127,14 +140,14 @@ function onMouseUp() {
     </form>
     <div class="row gx-0">
       <div class="col-auto">
-        <pre>
+        <pre v-show="fileContent">
           <code class="hljs" style=" text-align: right;">{{
               fileContent.split('\n').map((_, i) => i).slice(1).join('\n')
             }}</code>
         </pre>
       </div>
       <div class="col">
-        <pre>
+        <pre style="position: relative; overflow: hidden">
           <code
               class="language-python"
               ref="codeEditor"
@@ -142,14 +155,19 @@ function onMouseUp() {
               @mouseup="onMouseUp"
               @focusout="highlightCode"
           >{{ fileContent }}</code>
-      </pre>
+          <Highlighter :lines="[[explainFrom, explainTill]]"/>
+        </pre>
       </div>
     </div>
   </div>
 </template>
 
 <style lang="scss">
-@import "highlight.js/scss/monokai";
+@import "highlight.js/scss/atom-one-light";
+
+.hljs {
+  background-color: transparent;
+}
 </style>
 
 <style lang="scss" scoped>
