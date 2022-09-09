@@ -45,8 +45,15 @@ function onMouseUp() {
   if (selection === null || codeEditor.value === undefined) {
     return;
   }
-  const siblings = Array.from<Node>(codeEditor.value.childNodes);
   let anchorNode = selection.anchorNode as Node;
+  let focusNode = selection.focusNode as Node;
+  if (anchorNode === focusNode && selection.anchorOffset == selection.focusOffset) {
+    // this is a click; not selection
+    return;
+  }
+
+  const siblings = Array.from<Node>(codeEditor.value.childNodes);
+
   while (anchorNode.parentNode !== codeEditor.value) {
     // reach the direct child of codeEditor
     anchorNode = anchorNode.parentNode as Node;
@@ -60,7 +67,6 @@ function onMouseUp() {
       0
     );
 
-  let focusNode = selection.focusNode as Node;
   while (focusNode.parentNode !== codeEditor.value) {
     // reach the direct child of codeEditor
     focusNode = focusNode.parentNode as Node;
