@@ -4,8 +4,12 @@ import python from "highlight.js/lib/languages/python";
 import { computed, nextTick, ref, watch } from "vue";
 
 import Highlighter from "../components/Highlighter.vue";
-import Explanations, { Explanation } from "../components/Explanations.vue";
+import Explanations, {
+  IExplanationEntry,
+  IScoredExplanation,
+} from "../components/Explanations.vue";
 import ModelName from "../components/ModelName.vue";
+import axios from "axios";
 
 hljs.registerLanguage("python", python);
 
@@ -13,8 +17,9 @@ const fileContent = ref("");
 const codeEditor = ref<HTMLDivElement>();
 const explainFrom = ref<number>();
 const explainTill = ref<number>();
+const explanationModel = ref('');
 
-const explanations = ref<Explanation[]>([]);
+const explanations = ref<IExplanationEntry[]>([]);
 
 const highlightedLines = computed(() => {
   const highlightedLines = explanations.value.map((exp) => [exp.from, exp.to]);
@@ -111,15 +116,32 @@ function onMouseUp() {
   explainTill.value = selectedLines + 1;
 }
 
-function explain() {
+interface IExplanationResp {
+  model: string;
+  explanations: IScoredExplanation[];
+}
+
+async function explain() {
   if (!explainFrom.value || !explainTill.value) {
     return;
   }
-  explanations.value.push({
-    from: explainFrom.value,
-    to: explainTill.value,
-    explanation: `This is an explanation from line ${explainFrom.value} to ${explainTill.value}`,
-  });
+  try {
+    const explainResp = await axios.post<IExplanationResp>("/explain", {
+      code: fileContent.value,
+      start: explainFrom.value,
+      end: explainTill.value,
+      model: explanationModel.value,
+    });
+    const explanation = explainResp.data;
+    explanations.value.push({
+      from: explainFrom.value,
+      to: explainTill.value,
+      model: explanation.model,
+      explanations: explanation.explanations,
+    });
+  } catch (e) {
+    console.error(e);
+  }
 }
 </script>
 
@@ -159,10 +181,16 @@ function explain() {
         </div>
       </div>
       <div class="col-auto">
-        <ModelName />
+        <ModelName @change="explanationModel=$event" />
       </div>
       <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Explain</button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          :disabled="!explainFrom || !explainTill"
+        >
+          Explain
+        </button>
       </div>
     </form>
     <div class="row gx-0">

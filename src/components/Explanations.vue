@@ -8,7 +8,7 @@
         height: `${(explanation.to - explanation.from + 1) * 1.5}em`,
       }"
     >
-      {{ explanation.explanation }}
+      {{ explanation.explanations[0].explanation }}
     </p>
   </div>
 </template>
@@ -16,10 +16,16 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-export interface Explanation {
+export interface IScoredExplanation {
+  score: number;
+  explanation: string;
+}
+
+export interface IExplanationEntry {
   from: number;
   to: number;
-  explanation: string;
+  model: string;
+  explanations: IScoredExplanation[];
 }
 
 export default defineComponent({
@@ -28,7 +34,7 @@ export default defineComponent({
   props: {
     explanations: {
       required: true,
-      type: Array as PropType<Explanation[]>,
+      type: Array as PropType<IExplanationEntry[]>,
     },
   },
 });

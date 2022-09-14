@@ -20,11 +20,19 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "ModelName",
+  emits: {
+    change: String,
+  },
   data() {
     return {
       models: {} as Record<string, string>,
       selectedModel: "",
     };
+  },
+  watch: {
+    selectedModel() {
+      this.$emit('change', this.models[this.selectedModel]);
+    },
   },
   async created() {
     try {
