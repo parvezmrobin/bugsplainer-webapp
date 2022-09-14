@@ -1,5 +1,4 @@
 import random
-import sys
 import uuid
 from dataclasses import dataclass, asdict
 from time import time
@@ -65,7 +64,7 @@ def send_req_ids(response: Response):
 
 @app.errorhandler(Exception)
 def handle_exception(e: Exception):
-    print(e, sys.stderr)
+    app.logger.error('Error: %s', e)
 
     status_code = 500
     if isinstance(e, HTTPException):
