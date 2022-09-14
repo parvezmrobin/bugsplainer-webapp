@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import hljs from "highlight.js/lib/core";
 import python from "highlight.js/lib/languages/python";
-import {computed, nextTick, ref, watch} from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 
 import Highlighter from "../components/Highlighter.vue";
 import Explanations, { Explanation } from "../components/Explanations.vue";
+import ModelName from "../components/ModelName.vue";
 
 hljs.registerLanguage("python", python);
 
@@ -18,11 +19,11 @@ const explanations = ref<Explanation[]>([]);
 const highlightedLines = computed(() => {
   const highlightedLines = explanations.value.map((exp) => [exp.from, exp.to]);
   if (explainFrom.value && explainTill.value) {
-    highlightedLines.push([explainFrom.value, explainTill.value])
+    highlightedLines.push([explainFrom.value, explainTill.value]);
   }
 
   return highlightedLines;
-})
+});
 
 function readFile(event: Event) {
   let files = (event.target as HTMLInputElement).files as FileList;
@@ -158,9 +159,10 @@ function explain() {
         </div>
       </div>
       <div class="col-auto">
-        <button type="submit" class="btn btn-primary">
-          Explain
-        </button>
+        <ModelName />
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Explain</button>
       </div>
     </form>
     <div class="row gx-0">

@@ -4,12 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently --names=Server,Client --prefix-colors=magenta,green \"%PYTHON_EXE% -m flask run\" \"vite\"",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^0.27.2",
     "bootstrap": "^5.2.0",
+    "concurrently": "^7.4.0",
     "highlight.js": "^11.6.0",
     "lodash": "^4.17.21",
     "prettier": "^2.7.1",
