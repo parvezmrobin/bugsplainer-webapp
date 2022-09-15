@@ -6,7 +6,7 @@
       v-model="selectedModel"
       aria-label="Select Model Name"
     >
-      <option :value="modelId" v-for="(model, modelId) in models">
+      <option :value="model" v-for="model in models">
         {{ model }}
       </option>
     </select>
@@ -25,18 +25,18 @@ export default defineComponent({
   },
   data() {
     return {
-      models: {} as Record<string, string>,
+      models: {} as string[],
       selectedModel: "",
     };
   },
   watch: {
     selectedModel() {
-      this.$emit('change', this.models[this.selectedModel]);
+      this.$emit('change', this.selectedModel);
     },
   },
   async created() {
     try {
-      const modelsResp = await axios.get<{ models: Record<string, string> }>(
+      const modelsResp = await axios.get<{ models: string[] }>(
         "/models"
       );
       this.models = modelsResp.data.models;

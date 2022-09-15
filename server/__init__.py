@@ -1,4 +1,5 @@
 import random
+import re
 import uuid
 from dataclasses import dataclass, asdict
 from time import time
@@ -14,9 +15,9 @@ CORS(app)
 
 @dataclass
 class ModelNames:
-    Bugsplainer: str = 'Bugsplainer'
-    Bugsplainer220M: str = 'Bugsplainer 220M'
-    FineTunedCodeT5: str = 'Fine-Tuned CodeT5'
+    Bugsplainer: str = '262.finetune-sbt-random-512-64-16-60m'
+    Bugsplainer220M: str = '268.finetune-sbt-random-512-64-16-220m'
+    FineTunedCodeT5: str = '251.finetune-patch-sbt1-large-512-64-16-60m'
 
 
 model_names = ModelNames()
@@ -24,7 +25,9 @@ model_names = ModelNames()
 
 @app.route('/models', methods=['GET'])
 def get_model_names():
-    return jsonify(models=asdict(model_names))
+    next_ch_cap_re = re.compile('(?<=[a-z])(?=[A-Z0-9])')
+    models = [' '.join(next_ch_cap_re.split(model)) for model in asdict(model_names).keys()]
+    return jsonify(models=models)
 
 
 @app.route('/explain', methods=['POST'])
