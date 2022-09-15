@@ -23,6 +23,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
+let resizeObserver: ResizeObserver;
+
 export default defineComponent({
   name: "Highlighter",
   props: {
@@ -58,10 +60,11 @@ export default defineComponent({
   mounted() {
     this.onWindowResize();
 
-    window.addEventListener("resize", this.onWindowResize);
+    resizeObserver = new ResizeObserver(this.onWindowResize);
+    resizeObserver.observe(this.$el);
   },
   beforeUnmount() {
-    window.removeEventListener("resize", this.onWindowResize);
+    resizeObserver.disconnect()
   },
 });
 </script>
