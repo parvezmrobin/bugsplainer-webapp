@@ -7,6 +7,8 @@
       :style="{
         top: `${(explanationGroup[0].from - 0.35) * 1.5}em`,
       }"
+      @mouseenter="onExplanationFocus"
+      @mouseleave="onExplanationBlur"
     >
       <div class="accordion" :id="`accordion_${loc}`">
         <div
@@ -47,6 +49,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import Collapse from "bootstrap/js/dist/collapse";
 
 export interface IScoredExplanation {
   score: number;
@@ -84,6 +87,30 @@ export default defineComponent({
       }
 
       return explanationGroups;
+    },
+  },
+
+  methods: {
+    getCollapseInstancesForEvent: function (accordionDiv: HTMLDivElement) {
+      const collapseElements = accordionDiv.querySelectorAll(".collapse");
+      return Array.from(collapseElements).map((collapseElement) =>
+        Collapse.getOrCreateInstance(collapseElement)
+      );
+    },
+    onExplanationFocus(e: MouseEvent) {
+      const accordionDiv = e.target as HTMLDivElement;
+      accordionDiv.style.zIndex = "10";
+      this.getCollapseInstancesForEvent(accordionDiv).forEach(
+        (collapseInstance) => collapseInstance.show()
+      );
+    },
+    onExplanationBlur(e: MouseEvent) {
+      const accordionDiv = e.target as HTMLDivElement;
+      accordionDiv.style.zIndex = "auto";
+      this.getCollapseInstancesForEvent(accordionDiv).forEach(
+        (collapseInstance, i) =>
+          i === 0 ? collapseInstance.show() : collapseInstance.hide()
+      );
     },
   },
 });
