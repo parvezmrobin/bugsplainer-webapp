@@ -1,11 +1,5 @@
 <template>
   <svg class="highlighter">
-    <defs>
-      <linearGradient id="Gradient1">
-        <stop offset="98%" stop-color="#0184bb" stop-opacity="0.25" />
-        <stop offset="100%" stop-color="#0184bb" stop-opacity="0.00" />
-      </linearGradient>
-    </defs>
     <svg width="1em" height="1em" overflow="visible" viewBox="0 0 1 1">
       <rect
         v-for="highlightSegment in highlightSegments"
@@ -81,7 +75,7 @@ export default defineComponent({
 }
 
 .shadow {
-  -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.7));
+  -webkit-filter: drop-shadow(0.01em 0em 0.015em rgba(0, 0, 0, 0.7));
   filter: drop-shadow(0.01em 0em 0.015em rgba(0, 0, 0, 0.7));
 }
 </style>
