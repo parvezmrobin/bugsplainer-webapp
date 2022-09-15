@@ -64,7 +64,15 @@ async function explain() {
 
 <template>
   <div class="container-fluid">
-    <form class="row gy-2 gx-3 align-items-center" @submit.prevent="explain">
+    <div class="row px-5">
+      <h3>
+        Bugsplainer
+      </h3>
+    </div>
+    <form
+      class="row px-5 gy-2 gx-3 align-items-center"
+      @submit.prevent="explain"
+    >
       <div class="col-auto">
         <input
           type="file"
@@ -142,7 +150,7 @@ async function explain() {
 </style>
 
 <style lang="scss" scoped>
-code:focus-visible {
-  outline: none;
+h3 {
+  color: var(--bs-purple-600)
 }
 </style>
