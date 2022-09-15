@@ -11,6 +11,7 @@ axios.defaults.baseURL = origin.replace(/:\d+/, ":5000");
 
 <style lang="scss">
 $accordion-padding-y:                     0.5rem;
+$accordion-padding-x:                     0.5rem;
 @import "../node_modules/bootstrap/scss/bootstrap";
 
 $all-colors: map-merge-multiple($blues, $indigos, $purples, $pinks, $reds, $oranges, $yellows, $greens, $teals, $cyans);

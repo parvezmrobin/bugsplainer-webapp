@@ -43,11 +43,21 @@
             :aria-labelledby="`heading${loc + i}`"
           >
             <div class="accordion-body">
-              <ol>
-                <li v-for="exp in explanation.explanations">
-                  {{ exp.explanation }}
-                </li>
-              </ol>
+              <table class="table">
+                <thead>
+                <tr>
+                  <th scope="col">Score</th>
+                  <th scope="col">Explanation</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="exp in explanation.explanations" :key="exp.explanation">
+                  <th scope="row">{{exp.score.toFixed(2)}}</th>
+                  <td>{{exp.explanation}}</td>
+                </tr>
+                </tbody>
+              </table>
+
             </div>
           </div>
         </div>
@@ -191,7 +201,17 @@ export default defineComponent({
   background-color: var(--bs-accordion-active-bg);
 }
 
-ol {
+.accordion-body {
+  padding: 0;
+}
+
+.table {
   margin-bottom: 0;
+}
+
+tbody tr:last-child {
+  th, td {
+    border-bottom-width: 0;
+  }
 }
 </style>
