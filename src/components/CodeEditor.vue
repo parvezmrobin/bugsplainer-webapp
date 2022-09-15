@@ -1,14 +1,15 @@
 <template>
   <pre style="position: relative; overflow: visible">
-          <code
-              class="language-python"
-              ref="codeEditor"
-              contenteditable="true"
-              @mouseup="onMouseUp"
-              @focusout="highlightCode"
-          >{{ fileContent }}</code>
-          <Highlighter :lines="highlightedLines"/>
-        </pre>
+    <code
+      class="language-python"
+      ref="codeEditor"
+      contenteditable="true"
+      @mouseup="onMouseUp"
+      @focusout="highlightCode"
+      @mousemove="onMouseMove"
+    >{{ fileContent }}</code>
+    <Highlighter :lines="highlightedLines"/>
+  </pre>
 </template>
 <script lang="ts">
 import hljs from "highlight.js/lib/core";
@@ -16,6 +17,7 @@ import python from "highlight.js/lib/languages/python";
 import { defineComponent, nextTick, PropType } from "vue";
 import Highlighter from "./Highlighter.vue";
 import type { IExplanationEntry } from "./Explanations.vue";
+import { eventBus } from "../utils";
 
 hljs.registerLanguage("python", python);
 
@@ -44,17 +46,26 @@ export default defineComponent({
     },
   },
 
+  data() {
+    return {
+      fontSize: 14,
+      currentlyFocusedCodeSegment: null as null | [number, number],
+    };
+  },
+
   emits: {
     "update:explainFrom": Number,
     "update:explainTill": Number,
   },
 
   computed: {
+    uniqueExplanationLocations(): [number, number][] {
+      return [...new Set(this.explanations.map((el) => [el.from, el.to].toString()))]
+        .map((el) => el.split(","))
+        .map(([from, to]) => [Number.parseInt(from), Number.parseInt(to)]);
+    },
     highlightedLines() {
-      const highlightedLines = this.explanations.map((exp) => [
-        exp.from,
-        exp.to,
-      ]);
+      const highlightedLines = this.uniqueExplanationLocations.slice();
       if (this.explainFrom && this.explainTill) {
         highlightedLines.push([this.explainFrom, this.explainTill]);
       }
@@ -67,6 +78,9 @@ export default defineComponent({
       await nextTick();
       this.highlightCode();
     },
+  },
+  mounted() {
+    this.fontSize = parseFloat(getComputedStyle(this.$el).fontSize);
   },
   methods: {
     highlightCode() {
@@ -134,6 +148,30 @@ export default defineComponent({
 
       this.$emit("update:explainFrom", precedingLines + 1);
       this.$emit("update:explainTill", selectedLines + 1);
+    },
+    onMouseMove(e: MouseEvent) {
+      const codeEditor = this.$refs.codeEditor as HTMLPreElement;
+      const boundingRect = codeEditor.getBoundingClientRect();
+      const topPx = e.clientY - boundingRect.top;
+      const lineNo = Math.round(topPx / this.fontSize / 1.5); // line height = 1.5
+
+      for (const expLocation of this.uniqueExplanationLocations) {
+        const [from, to] = expLocation;
+        if (from <= lineNo && lineNo <= to) {
+          if (this.currentlyFocusedCodeSegment) {
+            if (this.currentlyFocusedCodeSegment.toString() !== expLocation.toString()) {
+              eventBus.emit("focusHighlight", [from, to]);
+              eventBus.emit("blurHighlight", this.currentlyFocusedCodeSegment);
+              this.currentlyFocusedCodeSegment = expLocation;
+            }
+          } else {
+            eventBus.emit("focusHighlight", [from, to]);
+            this.currentlyFocusedCodeSegment = expLocation;
+          }
+
+          break;
+        }
+      }
     },
   },
 });

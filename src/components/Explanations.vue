@@ -2,10 +2,11 @@
   <div class="root" style="position: relative; font-size: 14px">
     <div
       class="explanation"
+      :id="`explanation_${loc}`"
       v-for="(explanationGroup, loc) in explanationGroups"
       :key="loc"
       :style="{
-        top: `${(explanationGroup[0].from - 0.5) * 1.5}em`,
+        top: `${(explanationGroup[0].from - 0.4) * 1.5}em`,
       }"
       @mouseenter="onExplanationFocus"
       @mouseleave="onExplanationBlur"
@@ -58,6 +59,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import Collapse from "bootstrap/js/dist/collapse";
+import { eventBus } from "../utils";
 
 export interface IScoredExplanation {
   score: number;
@@ -122,27 +124,52 @@ export default defineComponent({
   },
 
   methods: {
-    getCollapseInstancesForEvent: function (accordionDiv: HTMLDivElement) {
-      const collapseElements = accordionDiv.querySelectorAll(".collapse");
+    getCollapseInstancesForEvent: function (explanationDiv: HTMLDivElement) {
+      const collapseElements = explanationDiv.querySelectorAll(".collapse");
       return Array.from(collapseElements).map((collapseElement) =>
         Collapse.getOrCreateInstance(collapseElement)
       );
     },
     onExplanationFocus(e: MouseEvent) {
-      const accordionDiv = e.target as HTMLDivElement;
-      accordionDiv.style.zIndex = "10";
-      this.getCollapseInstancesForEvent(accordionDiv).forEach(
+      const explanationDiv = e.target as HTMLDivElement;
+      explanationDiv.style.zIndex = "10";
+      this.getCollapseInstancesForEvent(explanationDiv).forEach(
         (collapseInstance) => collapseInstance.show()
       );
     },
     onExplanationBlur(e: MouseEvent) {
-      const accordionDiv = e.target as HTMLDivElement;
-      accordionDiv.style.zIndex = "auto";
-      this.getCollapseInstancesForEvent(accordionDiv).forEach(
-        (collapseInstance, i) =>
-          i === 0 ? collapseInstance.show() : collapseInstance.hide()
+      const explanationDiv = e.target as HTMLDivElement;
+      explanationDiv.style.zIndex = "auto";
+      this.getCollapseInstancesForEvent(explanationDiv).forEach(
+        (collapseInstance) => collapseInstance.hide()
       );
     },
+    onHighlightFocus([from, to]: [number, number]) {
+      const explanationId = `explanation_${from}_${to}`;
+      const explanationDiv = document.getElementById(explanationId) as HTMLDivElement;
+      explanationDiv.style.zIndex = "10";
+      this.getCollapseInstancesForEvent(explanationDiv).forEach(
+          (collapseInstance) => collapseInstance.show()
+      );
+    },
+    onHighlightBlur([from, to]: [number, number]) {
+      const explanationId = `explanation_${from}_${to}`;
+      const explanationDiv = document.getElementById(explanationId) as HTMLDivElement;
+      explanationDiv.style.zIndex = "auto";
+      this.getCollapseInstancesForEvent(explanationDiv).forEach(
+          (collapseInstance) => collapseInstance.hide()
+      );
+    },
+  },
+
+  mounted() {
+    eventBus.on("focusHighlight", this.onHighlightFocus);
+    eventBus.on("blurHighlight", this.onHighlightBlur);
+  },
+
+  beforeUnmount() {
+    eventBus.off("focusHighlight", this.onHighlightFocus);
+    eventBus.off("blurHighlight", this.onHighlightBlur);
   },
 });
 </script>
@@ -154,7 +181,7 @@ export default defineComponent({
 
 .explanation {
   position: absolute;
-  left: 0;
+  left: -20px;
   width: 100%;
   padding-left: 3em;
 }
