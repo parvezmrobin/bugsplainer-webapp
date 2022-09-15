@@ -7,14 +7,15 @@
       </linearGradient>
     </defs>
     <svg width="1em" height="1em" overflow="visible" viewBox="0 0 1 1">
-      <template v-for="highlightSegment in highlightSegments">
-        <rect
-          :y="highlightSegment[0]"
-          :height="highlightSegment[1] - highlightSegment[0]"
-          :width="`${width}px`"
-          fill="url(#Gradient1)"
-        ></rect>
-      </template>
+      <rect
+        v-for="highlightSegment in highlightSegments"
+        x="0.5px"
+        :y="highlightSegment[0]"
+        :height="highlightSegment[1] - highlightSegment[0]"
+        :width="`${width}px`"
+        fill="white"
+        class="shadow"
+      ></rect>
     </svg>
   </svg>
 </template>
@@ -51,7 +52,7 @@ export default defineComponent({
   methods: {
     onWindowResize() {
       const fontSize = parseFloat(getComputedStyle(this.$el).fontSize);
-      this.width = this.$el.clientWidth / fontSize - 2; // 2em padding
+      this.width = this.$el.clientWidth / fontSize - 1; // 1em padding outside, 1em inside
     },
   },
   mounted() {
@@ -73,6 +74,11 @@ export default defineComponent({
   z-index: -1;
   width: 100%;
   height: 100%;
-  padding: 1em;
+  padding: 1em 0;
+}
+
+.shadow {
+  -webkit-filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0.01em 0em 0.015em rgba(0, 0, 0, 0.7));
 }
 </style>

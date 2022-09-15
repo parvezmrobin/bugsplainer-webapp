@@ -17,7 +17,7 @@ const fileContent = ref("");
 const codeEditor = ref<HTMLDivElement>();
 const explainFrom = ref<number>();
 const explainTill = ref<number>();
-const explanationModel = ref('');
+const explanationModel = ref("");
 
 const explanations = ref<IExplanationEntry[]>([]);
 
@@ -181,7 +181,7 @@ async function explain() {
         </div>
       </div>
       <div class="col-auto">
-        <ModelName @change="explanationModel=$event" />
+        <ModelName @change="explanationModel = $event" />
       </div>
       <div class="col-auto">
         <button

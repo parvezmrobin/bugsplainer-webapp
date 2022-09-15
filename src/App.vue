@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import "bootstrap";
 import axios from "axios";
-axios.defaults.baseURL = origin.replace(/:\d+/, ':5000');
-console.log(axios.defaults.baseURL)
 import Home from "./views/Home.vue";
+
+axios.defaults.baseURL = origin.replace(/:\d+/, ":5000");
 </script>
 
 <template>

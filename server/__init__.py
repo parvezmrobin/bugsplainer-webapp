@@ -37,7 +37,7 @@ def explain():
 
     explanations = [{
         'score': 1 - (random.random() * 0.1),
-        'explanation': f'This is an explanation from {model} for line {start} — {end}'
+        'explanation': f'This is an explanation from {model} for line {start} to {end}'
     }]
 
     return jsonify(model=model, explanations=explanations)
