@@ -5,12 +5,20 @@
       v-for="(explanationGroup, loc) in explanationGroups"
       :key="loc"
       :style="{
-        top: `${(explanationGroup[0].from - 0.35) * 1.5}em`,
+        top: `${(explanationGroup[0].from - 0.5) * 1.5}em`,
       }"
       @mouseenter="onExplanationFocus"
       @mouseleave="onExplanationBlur"
     >
-      <div class="accordion" :id="`accordion_${loc}`">
+      <div
+        class="accordion"
+        :id="`accordion_${loc}`"
+        :style="{
+          '--bs-accordion-active-color': colorOfLoc[loc].color,
+          '--bs-accordion-active-bg': colorOfLoc[loc].bg,
+          '--bs-accordion-border-color': colorOfLoc[loc].bg,
+        }"
+      >
         <div
           class="accordion-item"
           v-for="(explanation, i) in explanationGroup"
@@ -30,7 +38,7 @@
           </h2>
           <div
             :id="`collapse${loc + i}`"
-            class="accordion-collapse collapse show"
+            class="accordion-collapse collapse"
             :aria-labelledby="`heading${loc + i}`"
           >
             <div class="accordion-body">
@@ -63,6 +71,19 @@ export interface IExplanationEntry {
   explanations: IScoredExplanation[];
 }
 
+const baseColorNames = [
+  "blue",
+  "indigo",
+  "cyan",
+  "orange",
+  "purple",
+  "teal",
+  "yellow",
+  "green",
+];
+const colorNames = baseColorNames.map((color) => `var(--bs-${color}-900)`);
+const backgroundNames = baseColorNames.map((color) => `var(--bs-${color}-100)`);
+
 export default defineComponent({
   name: "Explanations",
 
@@ -73,7 +94,17 @@ export default defineComponent({
     },
   },
   computed: {
-    explanationGroups() {
+    colorOfLoc(): Record<string, { color: string; bg: string }> {
+      const colorKeyValues = Object.keys(this.explanationGroups).map(
+        (loc, i) => [
+          loc,
+          { color: colorNames[i % 9], bg: backgroundNames[i % 9] },
+        ]
+      );
+
+      return Object.fromEntries(colorKeyValues);
+    },
+    explanationGroups(): Record<string, IExplanationEntry[]> {
       const explanationGroups: Record<string, IExplanationEntry[]> = {};
 
       for (const explanationEntry of this.explanations) {
@@ -126,5 +157,14 @@ export default defineComponent({
   left: 0;
   width: 100%;
   padding-left: 3em;
+}
+
+.accordion .accordion-item:first-child .accordion-button {
+  color: var(--bs-accordion-active-color);
+  background-color: var(--bs-accordion-active-bg);
+}
+
+ol {
+  margin-bottom: 0;
 }
 </style>
