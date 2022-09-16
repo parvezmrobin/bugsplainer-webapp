@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import Explanations, {
   IExplanationEntry,
   IScoredExplanation,
@@ -7,11 +7,24 @@ import Explanations, {
 import ModelName from "../components/ModelName.vue";
 import axios from "axios";
 import CodeEditor from "../components/CodeEditor.vue";
+import { Tooltip } from "bootstrap";
 
 const fileContent = ref("");
 const explainFrom = ref<number>();
 const explainTill = ref<number>();
 const explanationModel = ref("");
+
+const explanationRequirement = computed(() => {
+  if (!fileContent.value) {
+    return "Please select a source code file";
+  }
+
+  if (!explainFrom.value || !explainTill.value) {
+    return "Please select the a source code segment to explain";
+  }
+
+  return null;
+});
 
 const explanations = ref<IExplanationEntry[]>([]);
 
@@ -60,6 +73,30 @@ async function explain() {
     console.error(e);
   }
 }
+
+const tooltipRef = ref<HTMLDivElement>();
+let tooltip: Tooltip;
+onMounted(() => {
+  if (!tooltipRef.value) {
+    throw new Error("tooltipRef is empty");
+  }
+  tooltip = new Tooltip(tooltipRef.value, {
+    title: explanationRequirement.value || "",
+  });
+});
+
+watch(explanationRequirement, () => {
+  if (!explanationRequirement.value) {
+    tooltip.disable();
+  } else {
+    tooltip.enable();
+    tooltip.setContent({ ".tooltip-inner": explanationRequirement.value });
+  }
+});
+
+onBeforeUnmount(() => {
+  tooltip.dispose();
+});
 </script>
 
 <template>
@@ -68,25 +105,25 @@ async function explain() {
   </div>
   <nav class="navbar sticky-top bg-light">
     <form
-        class="row px-5 gy-2 gx-3 align-items-center"
-        @submit.prevent="explain"
+      class="row px-5 gy-2 gx-3 align-items-center"
+      @submit.prevent="explain"
     >
       <div class="col-auto">
         <input
-            type="file"
-            class="form-control"
-            style="height: calc(3.5rem + 2px); line-height: 3.5rem"
-            @change="readFile"
+          type="file"
+          class="form-control"
+          style="height: calc(3.5rem + 2px); line-height: 3.5rem"
+          @change="readFile"
         />
       </div>
       <div class="col-auto">
         <div class="form-floating">
           <input
-              type="number"
-              class="form-control"
-              id="explainFrom"
-              v-model="explainFrom"
-              placeholder="Explain From"
+            type="number"
+            class="form-control"
+            id="explainFrom"
+            v-model="explainFrom"
+            placeholder="Explain From"
           />
           <label for="explainFrom">Explain From</label>
         </div>
@@ -94,11 +131,11 @@ async function explain() {
       <div class="col-auto">
         <div class="form-floating">
           <input
-              type="number"
-              class="form-control"
-              id="explainTill"
-              v-model="explainTill"
-              placeholder="Explain Till"
+            type="number"
+            class="form-control"
+            id="explainTill"
+            v-model="explainTill"
+            placeholder="Explain Till"
           />
           <label for="explainTill">Explain Till</label>
         </div>
@@ -106,12 +143,12 @@ async function explain() {
       <div class="col-auto">
         <ModelName @change="explanationModel = $event" />
       </div>
-      <div class="col-auto">
+      <div class="col-auto" ref="tooltipRef">
         <button
-            type="submit"
-            class="btn btn-primary"
-            style="height: calc(3.5rem + 2px)"
-            :disabled="!explainFrom || !explainTill"
+          type="submit"
+          class="btn btn-primary"
+          style="height: calc(3.5rem + 2px)"
+          :disabled="explanationRequirement"
         >
           Explain
         </button>
