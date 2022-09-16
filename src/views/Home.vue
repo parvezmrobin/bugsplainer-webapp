@@ -1,3 +1,34 @@
+<template>
+  <Navbar
+    v-model:fileContent="fileContent"
+    v-model:explainFrom="explainFrom"
+    v-model:explainTill="explainTill"
+    @newExplanation="onNewExplanation"
+  />
+  <div class="container-fluid">
+    <div class="row gx-0">
+      <div class="col-auto">
+        <pre v-show="fileContent">
+          <code class="hljs" style=" text-align: right;">{{
+              fileContent.split('\n').map((_, i) => i).slice(1).join('\n')
+            }}</code>
+        </pre>
+      </div>
+      <div class="col">
+        <CodeEditor
+          v-model:explain-from="explainFrom"
+          v-model:explain-till="explainTill"
+          :fileContent="fileContent"
+          :explanations="explanations"
+        />
+      </div>
+      <div class="col">
+        <Explanations :explanations="explanations" />
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref } from "vue";
 import CodeEditor from "../components/CodeEditor.vue";
@@ -24,37 +55,6 @@ function onNewExplanation(explanation: IExplanationResp) {
   });
 }
 </script>
-
-<template>
-  <Navbar
-    v-model:file-content="fileContent"
-    v-model:explain-from="explainFrom"
-    v-model:explain-till="explainTill"
-    @newExplanation="onNewExplanation"
-  />
-  <div class="container-fluid">
-    <div class="row gx-0">
-      <div class="col-auto">
-        <pre v-show="fileContent">
-          <code class="hljs" style=" text-align: right;">{{
-              fileContent.split('\n').map((_, i) => i).slice(1).join('\n')
-            }}</code>
-        </pre>
-      </div>
-      <div class="col">
-        <CodeEditor
-          :file-content="fileContent"
-          :explanations="explanations"
-          v-model:explain-from="explainFrom"
-          v-model:explain-till="explainTill"
-        />
-      </div>
-      <div class="col">
-        <Explanations :explanations="explanations" />
-      </div>
-    </div>
-  </div>
-</template>
 
 <style lang="scss">
 @import "highlight.js/scss/atom-one-light";

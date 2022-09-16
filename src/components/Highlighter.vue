@@ -3,6 +3,7 @@
     <svg width="1em" height="1em" overflow="visible" viewBox="0 0 1 1">
       <rect
         v-for="highlightSegment in highlightSegments"
+        :key="`${highlightSegment[0]}_${highlightSegment[1]}`"
         x="0.5px"
         :y="highlightSegment[0]"
         :height="highlightSegment[1] - highlightSegment[0]"
@@ -44,13 +45,6 @@ export default defineComponent({
       },
     },
   },
-
-  methods: {
-    onWindowResize() {
-      const fontSize = parseFloat(getComputedStyle(this.$el).fontSize);
-      this.width = this.$el.clientWidth / fontSize - 1; // 1em padding outside, 1em inside
-    },
-  },
   mounted() {
     this.onWindowResize();
 
@@ -58,7 +52,14 @@ export default defineComponent({
     resizeObserver.observe(this.$el);
   },
   beforeUnmount() {
-    resizeObserver.disconnect()
+    resizeObserver.disconnect();
+  },
+
+  methods: {
+    onWindowResize() {
+      const fontSize = parseFloat(getComputedStyle(this.$el).fontSize);
+      this.width = this.$el.clientWidth / fontSize - 1; // 1em padding outside, 1em inside
+    },
   },
 });
 </script>

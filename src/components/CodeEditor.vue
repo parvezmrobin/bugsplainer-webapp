@@ -1,8 +1,8 @@
 <template>
   <pre style="position: relative; overflow: visible">
     <code
-      class="language-python"
       ref="codeEditor"
+      class="language-python"
       contenteditable="true"
       @mouseup="onMouseUp"
       @focusout="highlightCode"
@@ -37,13 +37,18 @@ export default defineComponent({
       type: Array as PropType<IExplanationEntry[]>,
     },
     explainFrom: {
-      required: false,
+      default: undefined,
       type: Number,
     },
     explainTill: {
-      required: false,
+      default: undefined,
       type: Number,
     },
+  },
+
+  emits: {
+    "update:explainFrom": Number,
+    "update:explainTill": Number,
   },
 
   data() {
@@ -53,14 +58,11 @@ export default defineComponent({
     };
   },
 
-  emits: {
-    "update:explainFrom": Number,
-    "update:explainTill": Number,
-  },
-
   computed: {
     uniqueExplanationLocations(): [number, number][] {
-      return [...new Set(this.explanations.map((el) => [el.from, el.to].toString()))]
+      return [
+        ...new Set(this.explanations.map((el) => [el.from, el.to].toString())),
+      ]
         .map((el) => el.split(","))
         .map(([from, to]) => [Number.parseInt(from), Number.parseInt(to)]);
     },
@@ -159,7 +161,10 @@ export default defineComponent({
         const [from, to] = expLocation;
         if (from <= lineNo && lineNo <= to) {
           if (this.currentlyFocusedCodeSegment) {
-            if (this.currentlyFocusedCodeSegment.toString() !== expLocation.toString()) {
+            if (
+              this.currentlyFocusedCodeSegment.toString() !==
+              expLocation.toString()
+            ) {
               eventBus.emit("focusHighlight", [from, to]);
               eventBus.emit("blurHighlight", this.currentlyFocusedCodeSegment);
               this.currentlyFocusedCodeSegment = expLocation;

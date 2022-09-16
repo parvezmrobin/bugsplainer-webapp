@@ -18,12 +18,12 @@
       <div class="col-auto">
         <div class="form-floating">
           <input
+            id="explainFrom"
             type="number"
             class="form-control"
-            id="explainFrom"
             placeholder="Explain From"
             :value="explainFrom"
-            @input="this.$emit('update:explainFrom', $event.target.value)"
+            @input="$emit('update:explainFrom', $event.target.value)"
           />
           <label for="explainFrom">Explain From</label>
         </div>
@@ -31,12 +31,12 @@
       <div class="col-auto">
         <div class="form-floating">
           <input
+            id="explainTill"
             type="number"
             class="form-control"
-            id="explainTill"
             :value="explainTill"
             placeholder="Explain Till"
-            @input="this.$emit('update:explainTill', $event.target.value)"
+            @input="$emit('update:explainTill', $event.target.value)"
           />
           <label for="explainTill">Explain Till</label>
         </div>
@@ -44,7 +44,7 @@
       <div class="col-auto">
         <ModelName @change="explanationModel = $event" />
       </div>
-      <div class="col-auto" ref="tooltipRef">
+      <div ref="tooltipRef" class="col-auto">
         <button
           type="submit"
           class="btn btn-primary"
@@ -95,18 +95,18 @@ export default defineComponent({
       type: Number,
     },
   },
-  data() {
-    return {
-      explanationModel: "",
-      fetchingExplanation: false,
-    };
-  },
   emits: [
     "newExplanation",
     "update:fileContent",
     "update:explainFrom",
     "update:explainTill",
   ],
+  data() {
+    return {
+      explanationModel: "",
+      fetchingExplanation: false,
+    };
+  },
   computed: {
     explanationRequirement() {
       if (!this.fileContent) {
@@ -143,7 +143,7 @@ export default defineComponent({
   },
   methods: {
     readFile(event: Event) {
-      let files = (event.target as HTMLInputElement).files as FileList;
+      const files = (event.target as HTMLInputElement).files as FileList;
       const file = files[0];
       const reader = new FileReader();
 

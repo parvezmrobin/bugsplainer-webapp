@@ -1,10 +1,10 @@
 <template>
   <div class="root" style="position: relative; font-size: 14px">
     <div
-      class="explanation"
-      :id="`explanation_${loc}`"
       v-for="(explanationGroup, loc) in explanationGroups"
+      :id="`explanation_${loc}`"
       :key="loc"
+      class="explanation"
       :style="{
         top: `${(explanationGroup[0].from - 0.4) * 1.5}em`,
       }"
@@ -12,8 +12,8 @@
       @mouseleave="onExplanationBlur"
     >
       <div
-        class="accordion"
         :id="`accordion_${loc}`"
+        class="accordion"
         :style="{
           '--bs-accordion-active-color': colorOfLoc[loc].color,
           '--bs-accordion-active-bg': colorOfLoc[loc].bg,
@@ -21,11 +21,11 @@
         }"
       >
         <div
-          class="accordion-item"
           v-for="(explanation, i) in explanationGroup"
           :key="loc + i"
+          class="accordion-item"
         >
-          <h2 class="accordion-header" :id="`heading${loc + i}`">
+          <h2 :id="`heading${loc + i}`" class="accordion-header">
             <button
               class="accordion-button"
               type="button"
@@ -45,19 +45,21 @@
             <div class="accordion-body">
               <table class="table">
                 <thead>
-                <tr>
-                  <th scope="col">Score</th>
-                  <th scope="col">Explanation</th>
-                </tr>
+                  <tr>
+                    <th scope="col">Score</th>
+                    <th scope="col">Explanation</th>
+                  </tr>
                 </thead>
                 <tbody>
-                <tr v-for="exp in explanation.explanations" :key="exp.explanation">
-                  <th scope="row">{{exp.score.toFixed(2)}}</th>
-                  <td>{{exp.explanation}}</td>
-                </tr>
+                  <tr
+                    v-for="exp in explanation.explanations"
+                    :key="exp.explanation"
+                  >
+                    <th scope="row">{{ exp.score.toFixed(2) }}</th>
+                    <td>{{ exp.explanation }}</td>
+                  </tr>
                 </tbody>
               </table>
-
             </div>
           </div>
         </div>
@@ -133,6 +135,16 @@ export default defineComponent({
     },
   },
 
+  mounted() {
+    eventBus.on("focusHighlight", this.onHighlightFocus);
+    eventBus.on("blurHighlight", this.onHighlightBlur);
+  },
+
+  beforeUnmount() {
+    eventBus.off("focusHighlight", this.onHighlightFocus);
+    eventBus.off("blurHighlight", this.onHighlightBlur);
+  },
+
   methods: {
     getCollapseInstancesForEvent: function (explanationDiv: HTMLDivElement) {
       const collapseElements = explanationDiv.querySelectorAll(".collapse");
@@ -156,30 +168,24 @@ export default defineComponent({
     },
     onHighlightFocus([from, to]: [number, number]) {
       const explanationId = `explanation_${from}_${to}`;
-      const explanationDiv = document.getElementById(explanationId) as HTMLDivElement;
+      const explanationDiv = document.getElementById(
+        explanationId
+      ) as HTMLDivElement;
       explanationDiv.style.zIndex = "10";
       this.getCollapseInstancesForEvent(explanationDiv).forEach(
-          (collapseInstance) => collapseInstance.show()
+        (collapseInstance) => collapseInstance.show()
       );
     },
     onHighlightBlur([from, to]: [number, number]) {
       const explanationId = `explanation_${from}_${to}`;
-      const explanationDiv = document.getElementById(explanationId) as HTMLDivElement;
+      const explanationDiv = document.getElementById(
+        explanationId
+      ) as HTMLDivElement;
       explanationDiv.style.zIndex = "auto";
       this.getCollapseInstancesForEvent(explanationDiv).forEach(
-          (collapseInstance) => collapseInstance.hide()
+        (collapseInstance) => collapseInstance.hide()
       );
     },
-  },
-
-  mounted() {
-    eventBus.on("focusHighlight", this.onHighlightFocus);
-    eventBus.on("blurHighlight", this.onHighlightBlur);
-  },
-
-  beforeUnmount() {
-    eventBus.off("focusHighlight", this.onHighlightFocus);
-    eventBus.off("blurHighlight", this.onHighlightBlur);
   },
 });
 </script>
@@ -210,7 +216,8 @@ export default defineComponent({
 }
 
 tbody tr:last-child {
-  th, td {
+  th,
+  td {
     border-bottom-width: 0;
   }
 }

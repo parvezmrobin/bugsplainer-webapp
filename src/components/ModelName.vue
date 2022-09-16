@@ -1,12 +1,12 @@
 <template>
   <div class="form-floating">
     <select
-      class="form-select"
       id="modelName"
       v-model="selectedModel"
+      class="form-select"
       aria-label="Select Model Name"
     >
-      <option :value="model" v-for="model in models">
+      <option v-for="model in models" :key="model" :value="model">
         {{ model }}
       </option>
     </select>
@@ -31,14 +31,12 @@ export default defineComponent({
   },
   watch: {
     selectedModel() {
-      this.$emit('change', this.selectedModel);
+      this.$emit("change", this.selectedModel);
     },
   },
   async created() {
     try {
-      const modelsResp = await axios.get<{ models: string[] }>(
-        "/models"
-      );
+      const modelsResp = await axios.get<{ models: string[] }>("/models");
       this.models = modelsResp.data.models;
       this.selectedModel = "Bugsplainer";
     } catch (e) {
