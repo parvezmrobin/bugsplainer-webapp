@@ -10,7 +10,7 @@
         {{ model }}
       </option>
     </select>
-    <label for="modelName">Works with selects</label>
+    <label for="modelName">Select Explainer Model</label>
   </div>
 </template>
 

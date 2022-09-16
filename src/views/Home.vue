@@ -1,160 +1,37 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { ref } from "vue";
+import CodeEditor from "../components/CodeEditor.vue";
 import Explanations, {
   IExplanationEntry,
-  IScoredExplanation,
 } from "../components/Explanations.vue";
-import ModelName from "../components/ModelName.vue";
-import axios from "axios";
-import CodeEditor from "../components/CodeEditor.vue";
-import { Tooltip } from "bootstrap";
+import Navbar, { IExplanationResp } from "../components/Navbar.vue";
 
 const fileContent = ref("");
 const explainFrom = ref<number>();
 const explainTill = ref<number>();
-const explanationModel = ref("");
-
-const explanationRequirement = computed(() => {
-  if (!fileContent.value) {
-    return "Please select a source code file";
-  }
-
-  if (!explainFrom.value || !explainTill.value) {
-    return "Please select the a source code segment to explain";
-  }
-
-  return null;
-});
 
 const explanations = ref<IExplanationEntry[]>([]);
 
-function readFile(event: Event) {
-  let files = (event.target as HTMLInputElement).files as FileList;
-  const file = files[0];
-  const reader = new FileReader();
-
-  reader.onload = function () {
-    if (reader.result === null) {
-      throw new Error("The file reads to null");
-    }
-    fileContent.value = reader.result.toString();
-  };
-  reader.onerror = function () {
-    throw new Error("Cannot read the file");
-  };
-
-  reader.readAsText(file, "utf-8");
-}
-
-interface IExplanationResp {
-  model: string;
-  explanations: IScoredExplanation[];
-}
-
-async function explain() {
+function onNewExplanation(explanation: IExplanationResp) {
   if (!explainFrom.value || !explainTill.value) {
-    return;
+    throw new Error("Explanation range was cleared while fetching explanation");
   }
-  try {
-    const explainResp = await axios.post<IExplanationResp>("/explain", {
-      code: fileContent.value,
-      start: explainFrom.value,
-      end: explainTill.value,
-      model: explanationModel.value,
-    });
-    const explanation = explainResp.data;
-    explanations.value.push({
-      from: explainFrom.value,
-      to: explainTill.value,
-      model: explanation.model,
-      explanations: explanation.explanations,
-    });
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-const tooltipRef = ref<HTMLDivElement>();
-let tooltip: Tooltip;
-onMounted(() => {
-  if (!tooltipRef.value) {
-    throw new Error("tooltipRef is empty");
-  }
-  tooltip = new Tooltip(tooltipRef.value, {
-    title: explanationRequirement.value || "",
+  explanations.value.push({
+    from: explainFrom.value,
+    to: explainTill.value,
+    model: explanation.model,
+    explanations: explanation.explanations,
   });
-});
-
-watch(explanationRequirement, () => {
-  if (!explanationRequirement.value) {
-    tooltip.disable();
-  } else {
-    tooltip.enable();
-    tooltip.setContent({ ".tooltip-inner": explanationRequirement.value });
-  }
-});
-
-onBeforeUnmount(() => {
-  tooltip.dispose();
-});
+}
 </script>
 
 <template>
-  <div class="navbar bg-light px-5">
-    <h3>Bugsplainer</h3>
-  </div>
-  <nav class="navbar sticky-top bg-light">
-    <form
-      class="row px-5 gy-2 gx-3 align-items-center"
-      @submit.prevent="explain"
-    >
-      <div class="col-auto">
-        <input
-          type="file"
-          class="form-control"
-          style="height: calc(3.5rem + 2px); line-height: 3.5rem"
-          @change="readFile"
-        />
-      </div>
-      <div class="col-auto">
-        <div class="form-floating">
-          <input
-            type="number"
-            class="form-control"
-            id="explainFrom"
-            v-model="explainFrom"
-            placeholder="Explain From"
-          />
-          <label for="explainFrom">Explain From</label>
-        </div>
-      </div>
-      <div class="col-auto">
-        <div class="form-floating">
-          <input
-            type="number"
-            class="form-control"
-            id="explainTill"
-            v-model="explainTill"
-            placeholder="Explain Till"
-          />
-          <label for="explainTill">Explain Till</label>
-        </div>
-      </div>
-      <div class="col-auto">
-        <ModelName @change="explanationModel = $event" />
-      </div>
-      <div class="col-auto" ref="tooltipRef">
-        <button
-          type="submit"
-          class="btn btn-primary"
-          style="height: calc(3.5rem + 2px)"
-          :disabled="explanationRequirement"
-        >
-          Explain
-        </button>
-      </div>
-    </form>
-  </nav>
+  <Navbar
+    v-model:file-content="fileContent"
+    v-model:explain-from="explainFrom"
+    v-model:explain-till="explainTill"
+    @newExplanation="onNewExplanation"
+  />
   <div class="container-fluid">
     <div class="row gx-0">
       <div class="col-auto">
