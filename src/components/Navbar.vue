@@ -48,10 +48,17 @@
         <button
           type="submit"
           class="btn btn-primary"
-          style="height: calc(3.5rem + 2px)"
-          :disabled="explanationRequirement"
+          style="height: calc(3.5rem + 2px); width: 4.5rem"
+          :disabled="explanationRequirement || fetchingExplanation"
         >
-          Explain
+          <span
+            v-if="fetchingExplanation"
+            class="spinner-grow text-info"
+            role="status"
+          >
+            <span class="visually-hidden">Loading...</span>
+          </span>
+          <template v-else> Explain </template>
         </button>
       </div>
     </form>
@@ -91,6 +98,7 @@ export default defineComponent({
   data() {
     return {
       explanationModel: "",
+      fetchingExplanation: false,
     };
   },
   emits: [
@@ -156,6 +164,7 @@ export default defineComponent({
         return;
       }
       try {
+        this.fetchingExplanation = true;
         const explainResp = await axios.post<IExplanationResp>("/explain", {
           code: this.fileContent,
           start: Number(this.explainFrom),
@@ -167,6 +176,8 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       }
+
+      this.fetchingExplanation = false;
     },
   },
 });
