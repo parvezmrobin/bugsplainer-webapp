@@ -10,6 +10,7 @@ axios.defaults.baseURL = origin.replace(/:\d+/, ":5000");
 </template>
 
 <style lang="scss">
+$enable-negative-margins:                 true;
 $accordion-padding-y:                     0.5rem;
 $accordion-padding-x:                     0.5rem;
 @import "../node_modules/bootstrap/scss/bootstrap";

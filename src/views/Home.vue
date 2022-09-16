@@ -63,32 +63,30 @@ async function explain() {
 </script>
 
 <template>
-  <div class="container-fluid">
-    <div class="row px-5">
-      <h3>
-        Bugsplainer
-      </h3>
-    </div>
+  <div class="navbar bg-light px-5">
+    <h3>Bugsplainer</h3>
+  </div>
+  <nav class="navbar sticky-top bg-light">
     <form
-      class="row px-5 gy-2 gx-3 align-items-center"
-      @submit.prevent="explain"
+        class="row px-5 gy-2 gx-3 align-items-center"
+        @submit.prevent="explain"
     >
       <div class="col-auto">
         <input
-          type="file"
-          class="form-control"
-          style="height: calc(3.5rem + 2px); line-height: 3.5rem"
-          @change="readFile"
+            type="file"
+            class="form-control"
+            style="height: calc(3.5rem + 2px); line-height: 3.5rem"
+            @change="readFile"
         />
       </div>
       <div class="col-auto">
         <div class="form-floating">
           <input
-            type="number"
-            class="form-control"
-            id="explainFrom"
-            v-model="explainFrom"
-            placeholder="Explain From"
+              type="number"
+              class="form-control"
+              id="explainFrom"
+              v-model="explainFrom"
+              placeholder="Explain From"
           />
           <label for="explainFrom">Explain From</label>
         </div>
@@ -96,11 +94,11 @@ async function explain() {
       <div class="col-auto">
         <div class="form-floating">
           <input
-            type="number"
-            class="form-control"
-            id="explainTill"
-            v-model="explainTill"
-            placeholder="Explain Till"
+              type="number"
+              class="form-control"
+              id="explainTill"
+              v-model="explainTill"
+              placeholder="Explain Till"
           />
           <label for="explainTill">Explain Till</label>
         </div>
@@ -110,14 +108,17 @@ async function explain() {
       </div>
       <div class="col-auto">
         <button
-          type="submit"
-          class="btn btn-primary"
-          :disabled="!explainFrom || !explainTill"
+            type="submit"
+            class="btn btn-primary"
+            style="height: calc(3.5rem + 2px)"
+            :disabled="!explainFrom || !explainTill"
         >
           Explain
         </button>
       </div>
     </form>
+  </nav>
+  <div class="container-fluid">
     <div class="row gx-0">
       <div class="col-auto">
         <pre v-show="fileContent">
@@ -151,6 +152,6 @@ async function explain() {
 
 <style lang="scss" scoped>
 h3 {
-  color: var(--bs-purple-600)
+  color: var(--bs-purple-600);
 }
 </style>
