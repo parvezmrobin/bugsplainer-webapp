@@ -1,5 +1,4 @@
 import os.path
-import random
 import uuid
 from dataclasses import dataclass, asdict
 from time import time
@@ -11,6 +10,8 @@ from flask_cors import CORS
 from torch.nn import functional as F
 from transformers import T5Config, T5ForConditionalGeneration, RobertaTokenizer
 from werkzeug.exceptions import HTTPException
+
+from .Bugsplainer import Bugsplainer
 
 app = Flask(__name__)
 CORS(app)
@@ -58,10 +59,13 @@ def explain():
             code, start, end, num_explanations
         )
     else:
-        explanations = [Explanation(
-            f'This is an explanation from {model} for line {start} to {end}',
-            1 - (random.random() * 0.1),
-        )]
+        large = model == model_names.Bugsplainer220M.name
+        explanations = _get_explanations_from_Bugsplainer(
+            code, start, end,
+            config_path=os.path.join(MODEL_DIR, 'config_220m.json' if large else 'config_60m.json'),
+            num_explanations=num_explanations,
+            large=large
+        )
 
     return jsonify(model=model, explanations=explanations)
 
@@ -115,6 +119,21 @@ def _get_explanations_from_fine_tuned_CodeT5(
     scores = F.softmax(outputs.sequences_scores, dim=0).tolist()
     return [
         Explanation(*param) for param in zip(explanations, scores)
+    ]
+
+
+def _get_explanations_from_Bugsplainer(
+        code: str, start: int, end: int, config_path: str, num_explanations: Optional[int] = None, large=False,
+):
+    model_file = ModelNames.Bugsplainer220M.file if large else ModelNames.Bugsplainer.file
+    model_path = os.path.join(
+        MODEL_DIR, model_file, 'output', 'checkpoint-best-bleu',
+    )
+    bugsplainer = Bugsplainer(max_length=512, config_path=config_path, model_path=model_path)
+    sbt = Bugsplainer.make_sbt_from_span(code, start, end)
+    explanation = bugsplainer.explain(sbt, num_explanations=num_explanations or 3)
+    return [
+        Explanation(*param) for param in zip(explanation.explanations, explanation.scores)
     ]
 
 
