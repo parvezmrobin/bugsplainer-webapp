@@ -2,8 +2,9 @@ import os.path
 import uuid
 from dataclasses import dataclass, asdict
 from time import time
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
+import pandas as pd
 import torch
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
@@ -68,6 +69,51 @@ def explain():
         )
 
     return jsonify(model=model, explanations=explanations)
+
+
+@app.route('/experimental/files', methods=['GET'])
+def get_experimental_files():
+    df: pd.DataFrame = pd.read_csv('./data/test-sbt-random-finetune.csv', usecols=['repo', 'path'])
+    filenames: pd.Series = df['repo'].str.replace('.', '/', regex=False) + '/' + df['path']
+    filenames = filenames[filenames.str.len() < 50]
+    return jsonify(files=filenames[-100:].sort_values().tolist())
+
+
+@app.route('/experimental/file')
+def get_experimental_file_content():
+    filename = request.values['path']
+    app.logger.info('filename: %s', filename)
+    df: pd.DataFrame = pd.read_csv('./data/test-sbt-random-finetune.csv', usecols=['repo', 'path', 'content'])
+    filename_parts = filename.split('/')
+    repo = '.'.join(filename_parts[:2])
+    path = '/'.join(filename_parts[2:])
+    df = df[(df['repo'] == repo) & (df['path'] == path)]
+    content = df.iloc[0]['content']
+
+    return jsonify(content=content)
+
+
+def group_recursively(filename_parts: List[List[str]], level=0) -> Dict[str, List]:
+    keywords = set(
+        filename_part[level] for filename_part in filename_parts
+        if len(filename_part) - 1 > level
+    )
+    group = {
+        key: [] for key in keywords
+    }
+    group['files'] = []
+    for filename_part in filename_parts:
+        dirname = filename_part[level]
+        if dirname in group:
+            group[dirname].append(filename_part)
+        else:
+            group['files'].append(filename_part)
+
+    for dirname, files in group.items():
+        if dirname != 'files':
+            group[dirname] = group_recursively(files, level=level + 1)
+
+    return group
 
 
 MODEL_DIR = 'server/models'

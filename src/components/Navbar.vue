@@ -1,14 +1,31 @@
 <template>
   <div class="navbar bg-light px-5">
     <h3>Bugsplainer</h3>
+    <div class="form-check form-switch">
+      <input
+        id="isExperimental"
+        class="form-check-input"
+        type="checkbox"
+        :value="isExperimental"
+        @change="$emit('update:isExperimental', $event.target.value)"
+      />
+      <label class="form-check-label text-warning" for="isExperimental">
+        Experimental UI
+      </label>
+    </div>
   </div>
   <nav class="navbar sticky-top bg-light">
     <form
-      class="row px-5 gy-2 gx-3 align-items-center"
+      class="row px-5 gy-2 gx-3 align-items-stretch"
       @submit.prevent="explain"
     >
       <div class="col-auto">
+        <SelectExperimentalFiles
+          v-if="isExperimental"
+          @update:fileContent="$emit('update:fileContent', $event)"
+        />
         <input
+          v-else
           type="file"
           class="form-control"
           style="height: calc(3.5rem + 2px); line-height: 3.5rem"
@@ -71,6 +88,7 @@ import { Tooltip } from "bootstrap";
 import { defineComponent } from "vue";
 import type { IScoredExplanation } from "./Explanations.vue";
 import ModelName from "./ModelName.vue";
+import SelectExperimentalFiles from "./SelectExperimentalFiles.vue";
 
 export interface IExplanationResp {
   model: string;
@@ -80,7 +98,7 @@ let tooltip: Tooltip;
 
 export default defineComponent({
   name: "Navbar",
-  components: { ModelName },
+  components: { SelectExperimentalFiles, ModelName },
   props: {
     fileContent: {
       required: true,
@@ -94,12 +112,17 @@ export default defineComponent({
       required: true,
       type: Number,
     },
+    isExperimental: {
+      required: true,
+      type: Boolean,
+    },
   },
   emits: [
     "newExplanation",
     "update:fileContent",
     "update:explainFrom",
     "update:explainTill",
+    "update:isExperimental",
   ],
   data() {
     return {
@@ -185,5 +208,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 h3 {
   color: var(--bs-purple-600);
+}
+
+.form-check-input:checked {
+  background-color: var(--bs-warning);
+  border-color: var(--bs-warning);
 }
 </style>

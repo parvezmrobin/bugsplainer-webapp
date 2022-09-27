@@ -3,6 +3,7 @@
     v-model:fileContent="fileContent"
     v-model:explainFrom="explainFrom"
     v-model:explainTill="explainTill"
+    v-model:isExperimental="isExperimental"
     @newExplanation="onNewExplanation"
   />
   <div class="container-fluid">
@@ -40,6 +41,7 @@ import Navbar, { IExplanationResp } from "../components/Navbar.vue";
 const fileContent = ref("");
 const explainFrom = ref<number>();
 const explainTill = ref<number>();
+const isExperimental = ref(false);
 
 const explanations = ref<IExplanationEntry[]>([]);
 
