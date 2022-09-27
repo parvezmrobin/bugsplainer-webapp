@@ -15,7 +15,7 @@
             }}</code>
         </pre>
       </div>
-      <div class="col">
+      <div class="col" style="max-width: 60%">
         <CodeEditor
           v-model:explain-from="explainFrom"
           v-model:explain-till="explainTill"
