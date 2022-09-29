@@ -3,7 +3,6 @@
     <div class="dropdown">
       <button
         class="btn dropdown-toggle"
-        :class="{ 'text-small text-muted': selectedFilename }"
         type="button"
         data-bs-toggle="dropdown"
         aria-expanded="false"
@@ -15,11 +14,7 @@
           <a
             class="dropdown-item"
             role="button"
-            @click="
-              $nextTick(() => {
-                selectedFilename = filename;
-              })
-            "
+            @click="selectedFilename = filename"
           >
             <span class="text-muted">
               {{ filename.substring(0, filename.lastIndexOf("/") + 1) }} </span
@@ -37,7 +32,7 @@
 
 <script lang="ts" setup>
 import axios from "axios";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const filenames = ref<string[]>([]);
 const selectedFilename = ref<string>("");
@@ -64,6 +59,17 @@ watch(selectedFilename, async () => {
   }
 });
 
+// noinspection JSUnusedGlobalSymbols
+const dropdownToggleColor = computed(() => {
+  const color = selectedFilename.value ? "--bs-secondary" : "--bs-body-color";
+  return `var(${color})`;
+});
+
+// noinspection JSUnusedGlobalSymbols
+const dropdownToggleFontSize = computed(() => {
+  return selectedFilename.value ? "0.8rem" : "1rem";
+});
+
 loadFiles();
 </script>
 
@@ -72,17 +78,16 @@ loadFiles();
   background-color: white;
 }
 
+.dropdown-toggle,
 .dropdown-toggle:hover,
 .dropdown-toggle:focus,
 .dropdown-toggle.show {
+  color: v-bind("dropdownToggleColor");
+  font-size: v-bind("dropdownToggleFontSize");
   border-color: transparent;
 }
 
 .dropdown-item {
   font-family: var(--bs-font-monospace);
-}
-
-.text-small {
-  font-size: 0.8rem;
 }
 </style>

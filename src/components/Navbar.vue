@@ -19,7 +19,7 @@
       class="row px-5 gy-2 gx-3 align-items-stretch"
       @submit.prevent="explain"
     >
-      <div class="col-auto">
+      <div class="col">
         <SelectExperimentalFiles
           v-if="isExperimental"
           @update:fileContent="$emit('update:fileContent', $event)"
@@ -32,7 +32,7 @@
           @change="readFile"
         />
       </div>
-      <div class="col-auto">
+      <div class="col">
         <div class="form-floating">
           <input
             id="explainFrom"
@@ -45,7 +45,7 @@
           <label for="explainFrom">Explain From</label>
         </div>
       </div>
-      <div class="col-auto">
+      <div class="col">
         <div class="form-floating">
           <input
             id="explainTill"
