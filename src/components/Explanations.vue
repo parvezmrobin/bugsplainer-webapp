@@ -85,16 +85,7 @@ export interface IExplanationEntry {
   explanations: IScoredExplanation[];
 }
 
-const baseColorNames = [
-  "blue",
-  "indigo",
-  "cyan",
-  "orange",
-  "purple",
-  "teal",
-  "yellow",
-  "green",
-];
+const baseColorNames = ["blue", "cyan", "yellow", "green"];
 const colorNames = baseColorNames.map((color) => `var(--bs-${color}-900)`);
 const backgroundNames = baseColorNames.map((color) => `var(--bs-${color}-100)`);
 
@@ -112,7 +103,10 @@ export default defineComponent({
       const colorKeyValues = Object.keys(this.explanationGroups).map(
         (loc, i) => [
           loc,
-          { color: colorNames[i % 9], bg: backgroundNames[i % 9] },
+          {
+            color: colorNames[i % baseColorNames.length],
+            bg: backgroundNames[i % baseColorNames.length],
+          },
         ]
       );
 
