@@ -27,6 +27,7 @@
         <input
           v-else
           type="file"
+          accept=".py"
           class="form-control"
           style="height: calc(3.5rem + 2px); line-height: 3.5rem"
           @change="readFile"
