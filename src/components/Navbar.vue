@@ -7,7 +7,7 @@
         class="form-check-input"
         type="checkbox"
         :value="isExperimental"
-        @change="$emit('update:isExperimental', $event.target.value)"
+        @input="$emit('update:isExperimental', $event.target.checked)"
       />
       <label class="form-check-label text-warning" for="isExperimental">
         Experimental UI
@@ -22,7 +22,7 @@
       <div class="col">
         <SelectExperimentalFiles
           v-if="isExperimental"
-          @update:fileContent="$emit('update:fileContent', $event)"
+          @update="onExperimentalFileUpdate"
         />
         <input
           v-else
@@ -41,7 +41,12 @@
             class="form-control"
             placeholder="Explain From"
             :value="explainFrom"
-            @input="$emit('update:explainFrom', $event.target.value)"
+            @input="
+              $emit(
+                'update:explainFrom',
+                Number.parseFloat($event.target.value)
+              )
+            "
           />
           <label for="explainFrom">Explain From</label>
         </div>
@@ -54,7 +59,12 @@
             class="form-control"
             :value="explainTill"
             placeholder="Explain Till"
-            @input="$emit('update:explainTill', $event.target.value)"
+            @input="
+              $emit(
+                'update:explainTill',
+                Number.parseFloat($event.target.value)
+              )
+            "
           />
           <label for="explainTill">Explain Till</label>
         </div>
@@ -87,11 +97,14 @@
 import axios from "axios";
 import { Tooltip } from "bootstrap";
 import { defineComponent } from "vue";
+import { ExperimentalFileContent } from "../utils";
 import type { IScoredExplanation } from "./Explanations.vue";
 import ModelName from "./ModelName.vue";
 import SelectExperimentalFiles from "./SelectExperimentalFiles.vue";
 
 export interface IExplanationResp {
+  from?: number;
+  to?: number;
   model: string;
   explanations: IScoredExplanation[];
 }
@@ -166,6 +179,32 @@ export default defineComponent({
     tooltip.dispose();
   },
   methods: {
+    async onExperimentalFileUpdate({
+      content,
+      start,
+      end,
+      commit_message: commitMessage,
+    }: ExperimentalFileContent) {
+      this.$emit("update:fileContent", content);
+      await this.$nextTick();
+
+      for (let i = 0; i < commitMessage.length; i++) {
+        const from = start[i];
+        const to = end[i];
+        const explanations: IScoredExplanation[] = [
+          { explanation: commitMessage[i], score: 1 },
+        ];
+
+        const newExplanation: IExplanationResp = {
+          from,
+          to,
+          model: "Human",
+          explanations,
+        };
+
+        this.$emit("newExplanation", newExplanation);
+      }
+    },
     readFile(event: Event) {
       const files = (event.target as HTMLInputElement).files as FileList;
       const file = files[0];

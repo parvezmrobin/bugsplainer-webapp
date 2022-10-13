@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import CodeEditor from "../components/CodeEditor.vue";
 import Explanations, {
   IExplanationEntry,
@@ -39,19 +39,28 @@ import Explanations, {
 import Navbar, { IExplanationResp } from "../components/Navbar.vue";
 
 const fileContent = ref("");
-const explainFrom = ref<number>();
-const explainTill = ref<number>();
+const explainFrom = ref<number>(NaN);
+const explainTill = ref<number>(NaN);
 const isExperimental = ref(false);
 
 const explanations = ref<IExplanationEntry[]>([]);
 
+watch(fileContent, () => {
+  explanations.value = [];
+  explainFrom.value = NaN;
+  explainTill.value = NaN;
+});
+
 function onNewExplanation(explanation: IExplanationResp) {
-  if (!explainFrom.value || !explainTill.value) {
+  const from = explanation.from ?? explainFrom.value;
+  const to = explanation.to ?? explainTill.value;
+  if (!from || !to) {
     throw new Error("Explanation range was cleared while fetching explanation");
   }
+
   explanations.value.push({
-    from: explainFrom.value,
-    to: explainTill.value,
+    from,
+    to,
     model: explanation.model,
     explanations: explanation.explanations,
   });

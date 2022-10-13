@@ -33,10 +33,11 @@
 <script lang="ts" setup>
 import axios from "axios";
 import { computed, ref, watch } from "vue";
+import { ExperimentalFileContent } from "../utils";
 
 const filenames = ref<string[]>([]);
 const selectedFilename = ref<string>("");
-const emit = defineEmits(["update:fileContent"]);
+const emit = defineEmits(["update"]);
 
 async function loadFiles() {
   try {
@@ -49,11 +50,10 @@ async function loadFiles() {
 
 watch(selectedFilename, async () => {
   try {
-    const filesResponse = await axios.get(
+    const filesResponse = await axios.get<ExperimentalFileContent>(
       "/experimental/file?path=" + encodeURI(selectedFilename.value)
     );
-    const fileContent = filesResponse.data.content;
-    emit("update:fileContent", fileContent);
+    emit("update", filesResponse.data);
   } catch (e) {
     console.error(e);
   }

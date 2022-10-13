@@ -83,14 +83,21 @@ def get_experimental_files():
 def get_experimental_file_content():
     filename = request.values['path']
     app.logger.info('filename: %s', filename)
-    df: pd.DataFrame = pd.read_csv('./data/test-sbt-random-finetune.csv', usecols=['repo', 'path', 'content'])
+    df: pd.DataFrame = pd.read_csv(
+        './data/test-sbt-random-finetune.csv',
+        usecols=['repo', 'path', 'commit_message', 'content', 'start', 'end'],
+    )
     filename_parts = filename.split('/')
     repo = '.'.join(filename_parts[:2])
     path = '/'.join(filename_parts[2:])
     df = df[(df['repo'] == repo) & (df['path'] == path)]
-    content = df.iloc[0]['content']
 
-    return jsonify(content=content)
+    return jsonify(
+        content=df.iloc[0]['content'],
+        start=df['start'].tolist(),
+        end=df['end'].tolist(),
+        commit_message=df['commit_message'].tolist(),
+    )
 
 
 def group_recursively(filename_parts: List[List[str]], level=0) -> Dict[str, List]:

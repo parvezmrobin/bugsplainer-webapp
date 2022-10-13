@@ -164,7 +164,10 @@ export default defineComponent({
       const explanationId = `explanation_${from}_${to}`;
       const explanationDiv = document.getElementById(
         explanationId
-      ) as HTMLDivElement;
+      ) as HTMLDivElement | null;
+      if (explanationDiv === null) {
+        return;
+      }
       explanationDiv.style.zIndex = "10";
       this.getCollapseInstancesForEvent(explanationDiv).forEach(
         (collapseInstance) => collapseInstance.show()
@@ -174,7 +177,10 @@ export default defineComponent({
       const explanationId = `explanation_${from}_${to}`;
       const explanationDiv = document.getElementById(
         explanationId
-      ) as HTMLDivElement;
+      ) as HTMLDivElement | null;
+      if (explanationDiv === null) {
+        return;
+      }
       explanationDiv.style.zIndex = "auto";
       this.getCollapseInstancesForEvent(explanationDiv).forEach(
         (collapseInstance) => collapseInstance.hide()
