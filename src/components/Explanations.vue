@@ -85,9 +85,19 @@ export interface IExplanationEntry {
   explanations: IScoredExplanation[];
 }
 
-const baseColorNames = ["blue", "cyan", "yellow", "green"];
-const colorNames = baseColorNames.map((color) => `var(--bs-${color}-900)`);
-const backgroundNames = baseColorNames.map((color) => `var(--bs-${color}-100)`);
+const baseColorNames = [
+  "orange",
+  "sky-blue",
+  "bluish-green",
+  "yellow",
+  "blue",
+  "vermilion",
+  "reddish-purple",
+];
+const colorNames = baseColorNames.map((color) => `var(--cb-${color})`);
+const backgroundNames = baseColorNames.map(
+  (color) => `var(--cb-${color}-light)`
+);
 
 export default defineComponent({
   name: "Explanations",
@@ -191,8 +201,23 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+$colors: (
+  "orange": rgb(230, 159, 0),
+  "sky-blue": rgb(86, 180, 233),
+  "bluish-green": rgb(0, 158, 115),
+  "yellow": rgb(240, 228, 66),
+  "blue": rgb(0, 114, 178),
+  "vermilion": rgb(213, 94, 0),
+  "reddish-purple": rgb(204, 121, 167),
+);
+
 .root {
   margin-top: 20px;
+
+  @each $name, $color in $colors {
+    --cb-#{$name}: #{darken($color, 25%)};
+    --cb-#{$name}-light: #{lighten($color, 25%)};
+  }
 }
 
 .explanation {
