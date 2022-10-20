@@ -1,18 +1,6 @@
 <template>
   <div class="navbar bg-light px-5">
     <h3>Bugsplainer</h3>
-    <div class="form-check form-switch">
-      <input
-        id="isExperimental"
-        class="form-check-input"
-        type="checkbox"
-        :value="isExperimental"
-        @input="$emit('update:isExperimental', $event.target.checked)"
-      />
-      <label class="form-check-label text-warning" for="isExperimental">
-        Experimental UI
-      </label>
-    </div>
   </div>
   <nav class="navbar sticky-top bg-light">
     <form
@@ -90,6 +78,21 @@
         </button>
       </div>
     </form>
+    <div
+      class="form-check form-switch bg-danger py-2 pe-2 rounded"
+      style="margin-right: 2.5rem; padding-left: 3rem"
+    >
+      <input
+        id="isExperimental"
+        class="form-check-input"
+        type="checkbox"
+        :value="isExperimental"
+        @input="$emit('update:isExperimental', $event.target.checked)"
+      />
+      <label class="form-check-label text-warning fw-bold" for="isExperimental">
+        Experimental UI
+      </label>
+    </div>
   </nav>
 </template>
 
