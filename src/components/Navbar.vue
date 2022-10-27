@@ -29,12 +29,7 @@
             class="form-control"
             placeholder="Explain From"
             :value="explainFrom"
-            @input="
-              $emit(
-                'update:explainFrom',
-                Number.parseFloat($event.target.value)
-              )
-            "
+            @input="updateExplainFrom"
           />
           <label for="explainFrom">Explain From</label>
         </div>
@@ -47,12 +42,7 @@
             class="form-control"
             :value="explainTill"
             placeholder="Explain Till"
-            @input="
-              $emit(
-                'update:explainTill',
-                Number.parseFloat($event.target.value)
-              )
-            "
+            @input="updateExplainTill"
           />
           <label for="explainTill">Explain Till</label>
         </div>
@@ -65,7 +55,7 @@
           type="submit"
           class="btn btn-primary"
           style="height: calc(3.5rem + 2px); width: 4.5rem"
-          :disabled="explanationRequirement || fetchingExplanation"
+          :disabled="!!explanationRequirement || fetchingExplanation"
         >
           <span
             v-if="fetchingExplanation"
@@ -87,7 +77,7 @@
         class="form-check-input"
         type="checkbox"
         :value="isExperimental"
-        @input="$emit('update:isExperimental', $event.target.checked)"
+        @input="updateIsExperimental"
       />
       <label class="form-check-label text-warning fw-bold" for="isExperimental">
         Experimental UI
@@ -182,6 +172,24 @@ export default defineComponent({
     tooltip.dispose();
   },
   methods: {
+    updateExplainFrom($event: Event) {
+      this.$emit(
+        "update:explainFrom",
+        Number.parseFloat(($event.target as HTMLInputElement).value)
+      );
+    },
+    updateExplainTill($event: Event) {
+      this.$emit(
+        "update:explainTill",
+        Number.parseFloat(($event.target as HTMLInputElement).value)
+      );
+    },
+    updateIsExperimental($event: Event) {
+      this.$emit(
+        "update:isExperimental",
+        ($event.target as HTMLInputElement).checked
+      );
+    },
     async onExperimentalFileUpdate({
       content,
       start,
