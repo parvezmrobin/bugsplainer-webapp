@@ -6,7 +6,7 @@
 import axios from "axios";
 import Home from "./views/Home.vue";
 
-axios.defaults.baseURL = origin.replace(/:\d+/, ":5000");
+axios.defaults.baseURL = origin.replace(/:\d+/, ":5002");
 </script>
 
 <style lang="scss">
