@@ -17,6 +17,9 @@ from .Bugsplainer import Bugsplainer
 app = Flask(__name__)
 CORS(app)
 
+MODEL_DIR = 'server/models'
+device = torch.device('cuda')
+
 
 @dataclass
 class Explanation:
@@ -40,10 +43,28 @@ class ModelNames:
 model_names = ModelNames()
 
 
+def create_model_from_data(_model_data):
+    config_path = os.path.join(
+        MODEL_DIR,
+        'config_220m.json' if _model_data['name'] == model_names.Bugsplainer220M.name else 'config_60m.json',
+    )
+    model_path = os.path.join(
+        MODEL_DIR, _model_data['file'], 'output', 'checkpoint-best-bleu',
+    )
+    return Bugsplainer(max_length=512, config_path=config_path, model_path=model_path)
+
+
+models = {}
+for model_data in asdict(model_names).values():
+    if model_data['name'] == model_names.FineTunedCodeT5.name:
+        continue
+    models[model_data['name']] = create_model_from_data(model_data)
+
+
 @app.route('/models', methods=['GET'])
 def get_model_names():
-    models = [model['name'] for model in asdict(model_names).values()]
-    return jsonify(models=models)
+    _model_names = [model['name'] for model in asdict(model_names).values()]
+    return jsonify(models=_model_names)
 
 
 @app.route('/explain', methods=['POST'])
@@ -60,12 +81,10 @@ def explain():
             code, start, end, num_explanations
         )
     else:
-        large = model == model_names.Bugsplainer220M.name
         explanations = _get_explanations_from_Bugsplainer(
             code, start, end,
-            config_path=os.path.join(MODEL_DIR, 'config_220m.json' if large else 'config_60m.json'),
+            model=models[model],
             num_explanations=num_explanations,
-            large=large
         )
 
     return jsonify(model=model, explanations=explanations)
@@ -123,10 +142,6 @@ def group_recursively(filename_parts: List[List[str]], level=0) -> Dict[str, Lis
     return group
 
 
-MODEL_DIR = 'server/models'
-device = torch.device('cuda')
-
-
 def _get_explanations_from_fine_tuned_CodeT5(
         code: str, start: int, end: int, num_explanations: Optional[int] = None,
 ):
@@ -176,15 +191,11 @@ def _get_explanations_from_fine_tuned_CodeT5(
 
 
 def _get_explanations_from_Bugsplainer(
-        code: str, start: int, end: int, config_path: str, num_explanations: Optional[int] = None, large=False,
+        code: str, start: int, end: int, model: Bugsplainer, num_explanations: Optional[int] = None,
 ):
-    model_file = ModelNames.Bugsplainer220M.file if large else ModelNames.Bugsplainer.file
-    model_path = os.path.join(
-        MODEL_DIR, model_file, 'output', 'checkpoint-best-bleu',
-    )
-    bugsplainer = Bugsplainer(max_length=512, config_path=config_path, model_path=model_path)
+
     sbt = Bugsplainer.make_sbt_from_span(code, start, end)
-    explanation = bugsplainer.explain(sbt, num_explanations=num_explanations or 3)
+    explanation = model.explain(sbt, num_explanations=num_explanations or 3)
     return [
         Explanation(*param) for param in zip(explanation.explanations, explanation.scores)
     ]
