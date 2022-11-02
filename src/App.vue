@@ -6,7 +6,9 @@
 import axios from "axios";
 import Home from "./views/Home.vue";
 
-axios.defaults.baseURL = origin.replace(/:\d+/, ":5002");
+const url = new URL(origin);
+url.port = '5002';
+axios.defaults.baseURL = url.toString();
 </script>
 
 <style lang="scss">
