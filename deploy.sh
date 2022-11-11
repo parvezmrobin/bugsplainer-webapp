@@ -1,5 +1,5 @@
 pkill gunicorn
-./venv/bin/gunicorn -w=2 --bind=0.0.0.0:5003 --daemon --error-logfile=error.log server:app
+./venv/bin/gunicorn -w=2 --bind=localhost:5000 --daemon --error-logfile=error.log server:app
 
 sudo apt install nginx -y
 yarn build
