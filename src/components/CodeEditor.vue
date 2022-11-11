@@ -5,7 +5,7 @@
       class="language-python"
       contenteditable="true"
       @mouseup="onMouseUp"
-      @focusout="highlightCode"
+      @focusout="onFocusOut"
       @mousemove="onMouseMove"
     >{{ fileContent }}</code>
     <Highlighter :lines="highlightedLines"/>
@@ -47,6 +47,7 @@ export default defineComponent({
   },
 
   emits: {
+    "update:fileContent": String,
     "update:explainFrom": Number,
     "update:explainTill": Number,
   },
@@ -64,7 +65,7 @@ export default defineComponent({
         ...new Set(this.explanations.map((el) => [el.from, el.to].toString())),
       ]
         .map((el) => el.split(","))
-        .map(([from, to]) => [Number.parseInt(from), Number.parseInt(to)]);
+        .map(([from, to]) => [Number.parseFloat(from), Number.parseFloat(to)]);
     },
     highlightedLines() {
       const highlightedLines = this.uniqueExplanationLocations.slice();
@@ -85,6 +86,17 @@ export default defineComponent({
     this.fontSize = parseFloat(getComputedStyle(this.$el).fontSize);
   },
   methods: {
+    async onFocusOut() {
+      if (!this.$refs.codeEditor) {
+        throw new Error();
+      }
+      this.$emit(
+        "update:fileContent",
+        (this.$refs.codeEditor as HTMLElement).textContent
+      );
+      await this.$nextTick();
+      this.highlightCode();
+    },
     highlightCode() {
       if (!this.$refs.codeEditor) {
         throw new Error();
