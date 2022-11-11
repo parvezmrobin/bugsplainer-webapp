@@ -1,6 +1,21 @@
 <template>
   <div class="navbar bg-light px-5">
     <h3>Bugsplainer</h3>
+    <div
+      class="form-check form-switch bg-danger py-2 pe-2 rounded"
+      style="padding-left: 3rem"
+    >
+      <input
+        id="isExperimental"
+        class="form-check-input"
+        type="checkbox"
+        :value="isExperimental"
+        @input="updateIsExperimental"
+      />
+      <label class="form-check-label text-warning fw-bold" for="isExperimental">
+        Experimental UI
+      </label>
+    </div>
   </div>
   <nav class="navbar sticky-top bg-light">
     <form
@@ -68,26 +83,11 @@
         </button>
       </div>
     </form>
-    <div
-      class="form-check form-switch bg-danger py-2 pe-2 rounded"
-      style="margin-right: 2.5rem; padding-left: 3rem"
-    >
-      <input
-        id="isExperimental"
-        class="form-check-input"
-        type="checkbox"
-        :value="isExperimental"
-        @input="updateIsExperimental"
-      />
-      <label class="form-check-label text-warning fw-bold" for="isExperimental">
-        Experimental UI
-      </label>
-    </div>
   </nav>
 </template>
 
 <script lang="ts">
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Tooltip } from "bootstrap";
 import { defineComponent } from "vue";
 import { ExperimentalFileContent } from "../utils";
@@ -237,6 +237,7 @@ export default defineComponent({
       if (!this.explainFrom || !this.explainTill) {
         return;
       }
+
       try {
         this.fetchingExplanation = true;
         const explainResp = await axios.post<IExplanationResp>("/explain", {
@@ -248,10 +249,17 @@ export default defineComponent({
         const explanation = explainResp.data;
         this.$emit("newExplanation", explanation);
       } catch (e) {
+        if (e instanceof AxiosError) {
+          if (e.response?.data.type === "SyntaxError") {
+            const { type, line, col, text } = e.response.data;
+            alert(`${type} on ${line}:${col} ${text}`);
+            return;
+          }
+        }
         console.error(e);
+      } finally {
+        this.fetchingExplanation = false;
       }
-
-      this.fetchingExplanation = false;
     },
   },
 });

@@ -19,7 +19,7 @@
         <CodeEditor
           v-model:explain-from="explainFrom"
           v-model:explain-till="explainTill"
-          :fileContent="fileContent"
+          v-model:fileContent="fileContent"
           :explanations="explanations"
         />
       </div>
