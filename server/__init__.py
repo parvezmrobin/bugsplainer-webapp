@@ -1,3 +1,4 @@
+import json
 import os.path
 import uuid
 from dataclasses import dataclass, asdict
@@ -81,11 +82,20 @@ def explain():
             code, start, end, num_explanations
         )
     else:
-        explanations = _get_explanations_from_Bugsplainer(
-            code, start, end,
-            model=models[model],
-            num_explanations=num_explanations,
-        )
+        try:
+            explanations = _get_explanations_from_Bugsplainer(
+                code, start, end,
+                model=models[model],
+                num_explanations=num_explanations,
+            )
+        except SyntaxError as syntax_error:
+            return {
+                'error': True,
+                'type': SyntaxError.__name__,
+                'line': syntax_error.lineno,
+                'col': syntax_error.offset,
+                'text': syntax_error.text,
+            }, 400
 
     return jsonify(model=model, explanations=explanations)
 
@@ -193,7 +203,6 @@ def _get_explanations_from_fine_tuned_CodeT5(
 def _get_explanations_from_Bugsplainer(
         code: str, start: int, end: int, model: Bugsplainer, num_explanations: Optional[int] = None,
 ):
-
     sbt = Bugsplainer.make_sbt_from_span(code, start, end)
     explanation = model.explain(sbt, num_explanations=num_explanations or 3)
     return [
@@ -209,15 +218,15 @@ def set_req_ids():
 
 @app.after_request
 def send_req_ids(response: Response):
-    response = {
+    response.data = json.dumps({
         # in OPTIONS requests, response.json is None
         **(response.json if response.json else {}),
-        'id': request.environ['id'],
+        'id': str(request.environ['id']),
         'created': request.environ['created'],
         'completed': time(),
-    }
+    })
 
-    return jsonify(response)
+    return response
 
 
 @app.errorhandler(Exception)
