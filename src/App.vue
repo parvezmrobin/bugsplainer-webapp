@@ -7,7 +7,9 @@ import axios from "axios";
 import Home from "./views/Home.vue";
 
 const url = new URL(origin);
-url.port = "5000";
+if (import.meta.env.DEV) {
+  url.port = "5000";
+}
 axios.defaults.baseURL = url.toString();
 </script>
 
