@@ -130,6 +130,7 @@ export default defineComponent({
     "update:explainFrom",
     "update:explainTill",
     "update:isExperimental",
+    "resetExplanation",
   ],
   data() {
     return {
@@ -196,7 +197,7 @@ export default defineComponent({
       end,
       commit_message: commitMessage,
     }: ExperimentalFileContent) {
-      this.$emit("update:fileContent", content);
+      this.updateFileContentAndResetExplanation(content);
       await this.$nextTick();
 
       for (let i = 0; i < commitMessage.length; i++) {
@@ -216,6 +217,10 @@ export default defineComponent({
         this.$emit("newExplanation", newExplanation);
       }
     },
+    updateFileContentAndResetExplanation: function (fileContent: string) {
+      this.$emit("update:fileContent", fileContent);
+      this.$emit("resetExplanation");
+    },
     readFile(event: Event) {
       const files = (event.target as HTMLInputElement).files as FileList;
       const file = files[0];
@@ -225,7 +230,7 @@ export default defineComponent({
         if (reader.result === null) {
           throw new Error("The file reads to null");
         }
-        this.$emit("update:fileContent", reader.result.toString());
+        this.updateFileContentAndResetExplanation(reader.result.toString());
       };
       reader.onerror = function () {
         throw new Error("Cannot read the file");

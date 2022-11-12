@@ -5,6 +5,7 @@
     v-model:explainTill="explainTill"
     v-model:isExperimental="isExperimental"
     @newExplanation="onNewExplanation"
+    @resetExplanation="onResetExplanation"
   />
   <div class="container-fluid">
     <div class="row gx-0">
@@ -31,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import CodeEditor from "../components/CodeEditor.vue";
 import Explanations, {
   IExplanationEntry,
@@ -44,12 +45,6 @@ const explainTill = ref<number>(NaN);
 const isExperimental = ref(false);
 
 const explanations = ref<IExplanationEntry[]>([]);
-
-watch(fileContent, () => {
-  explanations.value = [];
-  explainFrom.value = NaN;
-  explainTill.value = NaN;
-});
 
 function onNewExplanation(explanation: IExplanationResp) {
   const from = explanation.from ?? explainFrom.value;
@@ -64,6 +59,12 @@ function onNewExplanation(explanation: IExplanationResp) {
     model: explanation.model,
     explanations: explanation.explanations,
   });
+}
+
+function onResetExplanation() {
+  explanations.value = [];
+  explainFrom.value = NaN;
+  explainTill.value = NaN;
 }
 </script>
 
