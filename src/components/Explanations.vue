@@ -11,66 +11,31 @@
       @mouseenter="onExplanationFocus"
       @mouseleave="onExplanationBlur"
     >
-      <div
+      <ul
         :id="`accordion_${loc}`"
-        class="accordion"
+        class="list-group"
         :style="{
-          '--bs-accordion-active-color': colorOfLoc[loc].color,
-          '--bs-accordion-active-bg': colorOfLoc[loc].bg,
-          '--bs-accordion-border-color': colorOfLoc[loc].bg,
+          '--bs-list-group-color': colorOfLoc[loc].color,
+          '--bs-list-group-border-color': colorOfLoc[loc].bg,
         }"
       >
-        <div
+        <li
           v-for="(explanation, i) in explanationGroup"
           :key="loc + i"
-          class="accordion-item"
+          class="list-group-item d-flex justify-content-between align-items-start"
         >
-          <h2 :id="`heading${loc + i}`" class="accordion-header">
-            <button
-              class="accordion-button"
-              type="button"
-              data-bs-toggle="collapse"
-              :data-bs-target="`#collapse${loc + i}`"
-              aria-expanded="true"
-              :aria-controls="`collapse${loc + i}`"
-            >
-              {{ explanation.model }}
-            </button>
-          </h2>
-          <div
-            :id="`collapse${loc + i}`"
-            class="accordion-collapse collapse"
-            :aria-labelledby="`heading${loc + i}`"
-          >
-            <div class="accordion-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col">Score</th>
-                    <th scope="col">Explanation</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="exp in explanation.explanations"
-                    :key="exp.explanation"
-                  >
-                    <th scope="row">{{ exp.score.toFixed(2) }}</th>
-                    <td>{{ exp.explanation }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">{{ explanation.model }}</div>
+            {{ explanation.explanations[0].explanation }}
           </div>
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import Collapse from "bootstrap/js/dist/collapse";
 import { eventBus } from "../utils";
 
 export interface IScoredExplanation {
@@ -150,25 +115,13 @@ export default defineComponent({
   },
 
   methods: {
-    getCollapseInstancesForEvent: function (explanationDiv: HTMLDivElement) {
-      const collapseElements = explanationDiv.querySelectorAll(".collapse");
-      return Array.from(collapseElements).map((collapseElement) =>
-        Collapse.getOrCreateInstance(collapseElement)
-      );
-    },
     onExplanationFocus(e: MouseEvent) {
       const explanationDiv = e.target as HTMLDivElement;
       explanationDiv.style.zIndex = "10";
-      this.getCollapseInstancesForEvent(explanationDiv).forEach(
-        (collapseInstance) => collapseInstance.show()
-      );
     },
     onExplanationBlur(e: MouseEvent) {
       const explanationDiv = e.target as HTMLDivElement;
       explanationDiv.style.zIndex = "auto";
-      this.getCollapseInstancesForEvent(explanationDiv).forEach(
-        (collapseInstance) => collapseInstance.hide()
-      );
     },
     onHighlightFocus([from, to]: [number, number]) {
       const explanationId = `explanation_${from}_${to}`;
@@ -179,9 +132,6 @@ export default defineComponent({
         return;
       }
       explanationDiv.style.zIndex = "10";
-      this.getCollapseInstancesForEvent(explanationDiv).forEach(
-        (collapseInstance) => collapseInstance.show()
-      );
     },
     onHighlightBlur([from, to]: [number, number]) {
       const explanationId = `explanation_${from}_${to}`;
@@ -192,9 +142,6 @@ export default defineComponent({
         return;
       }
       explanationDiv.style.zIndex = "auto";
-      this.getCollapseInstancesForEvent(explanationDiv).forEach(
-        (collapseInstance) => collapseInstance.hide()
-      );
     },
   },
 });
