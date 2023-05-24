@@ -7,6 +7,6 @@ werkzeug==2.1.2
 flask_cors
 gunicorn==20.1.0
 
-# pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 torchaudio===0.10.0+cu113 torchtext==0.11.0 -f https://download.pytorch.org/whl/cu113/torch_stable.html
-torch==1.10.0+cu113
+# pip install torch==1.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+torch==1.11.0+cu113
 transformers==4.17.0
