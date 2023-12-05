@@ -17,6 +17,12 @@ pip install -r requirements.txt
 
 ## Run the application
 
+Set the env variables as
+```sh
+FLASK_APP=server:app;FLASK_ENV=development;PYTHON_EXE=.\venv\Scripts\python
+```
+
+Run both frontend and backend
 ```sh
 yarn dev
 ```
